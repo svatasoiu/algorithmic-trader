@@ -1,0 +1,24 @@
+My Trader
+================================================
+
+Overview
+
+This is my own attempt at building an algorithmic trader. My current plan is to split the process into building three parts:
+1) a scraper
+2) an analyzer
+3) a trade executer
+
+The scraper will just get data from some finance API (ex. Yahoo), the analyzer will decided what to do with the data from the scraper, and the trade exectuer will actually commit the plans of the analyzer. I plan to complete the scraper and analyzer, but perhaps not the executer as I don't want to actually use my own money. 
+
+I am doing this project both to learn more about functional programming and because I am interested in finance.
+
+================================================
+
+Dependencies
+
+core, async, yojson, cohttp, uri
+
+================================================
+
+To build, run "make" from the the root directory
+To start the scraper, run "make run"

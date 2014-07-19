@@ -21,4 +21,4 @@ core, async, yojson, cohttp, uri
 ================================================
 
 To build, run "make" from the the root directory
-To start the scraper, run "make run"
+To start the scraper, run "make run-scraper"

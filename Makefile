@@ -1,14 +1,14 @@
-EXEC=trader
+SCRAPEREXEC=start_scraper
 INCL=-I src/ -thread -linkpkg -package core,async,uri,yojson,cohttp.async
 
 default: build
 
-run:
-	bin/trader
+run-scraper:
+	bin/start_scraper
 
 build:
 	ocamlfind ocamlc -c $(INCL) src/scraper.mli src/scraper.ml
-	ocamlfind ocamlc $(INCL) src/*.ml -o bin/$(EXEC)
+	ocamlfind ocamlc $(INCL) src/scraper.ml src/start_scraper.ml -o bin/$(SCRAPEREXEC)
 	make clean
 
 clean:

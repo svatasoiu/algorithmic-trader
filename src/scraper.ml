@@ -7,6 +7,7 @@ let print_vals vals f = List.fold vals ~init:() ~f:f
 module type SCRAPER =
 	sig
 		type data
+		val extract_tickers : data -> string list
 		val get_data : string list -> string list -> data Deferred.t
 		val print_data : data -> unit
 	end;;
@@ -36,6 +37,10 @@ module BasicScraper : SCRAPER =
 			 | `List l -> List.map l extract_fields 
 			 | `Assoc _ -> [extract_fields quote]
 			 | _ -> []
+
+		let extract_tickers = 
+			function None -> []
+						 | Some l -> List.map l (fun (ticker, _) -> ticker)
 
 		let get_data fields tickers =
 			Cohttp_async.Client.get (create_uri fields tickers)

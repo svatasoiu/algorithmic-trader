@@ -3,6 +3,8 @@ open Async.Std;;
 
 exception EmptyRef;;
 
+let start_time = ref 0.
+let first = ref false
 let numPassed = ref 0
 let numFailed = ref 0
 let numExcept = ref 0
@@ -16,7 +18,8 @@ let empty_ref = fun _ -> ref None
 let add_test_case_to_suite tc = test_suite := tc::!test_suite
 
 let print_results = 
-	fun _ -> Printf.printf "\027[32m%d tests passed/%d tests failed/%d exceptions\n" !numPassed !numFailed !numExcept
+	fun _ -> Printf.printf "\027[32m%d tests passed/%d tests failed/%d exceptions in %fs\n" 
+												 !numPassed !numFailed !numExcept (Time.to_float (Time.now ()) -. !start_time)
 
 let handle_test_result test_id printer act exp t = 
 	try print_string ((if t 
@@ -34,6 +37,7 @@ let handle_test_result test_id printer act exp t =
 	 with the proper test_id *)
 let assert_test comp act exp ?printer test_id = 
 	let p = empty_ref () in
+	if not !first then (first := true; start_time := Time.to_float (Time.now ()));
 	try add_test_case_to_suite (act 
 														>>| (fun t -> p := Some t; comp t exp)
 														>>| handle_test_result test_id printer p exp)
@@ -44,7 +48,7 @@ let assert_test comp act exp ?printer test_id =
 	 with the proper test_id *)
 let assert_equal act exp ?printer test_id = assert_test (=) act exp ?printer:printer test_id
 
-(* runs all tests in test_suite and then shutsdown the scheduler *)
+(* runs all tests in test_suite and then shuts down the scheduler *)
 let run_suite = 
 	fun _ -> 
 		(match !test_suite with

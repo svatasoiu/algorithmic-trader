@@ -12,6 +12,18 @@ The scraper will just get data from some finance API (ex. Yahoo), the analyzer w
 
 I am doing this project both to learn more about functional programming and because I am interested in finance.
 
+Update:
+After trying to build tests from scratch, I realized that many of the tests are very similar. Therefore, I decided to create a test framework that involves asynchronous unit tests. The current signature for the test framework is:
+	val assert_test : ('a -> 'a -> bool) -> 'a Async.Std.Deferred.t -> 'a -> ?printer:('a -> string) -> string -> unit
+	val assert_equal : 'a Async.Std.Deferred.t -> 'a -> ?printer:('a -> string) -> string -> unit
+	val run_suite : 'a -> unit
+Or in more Pythonic terms, 
+	fun assert_test(comparison_function, Deferred value, expected value, optional printer, test ID)
+	fun assert_equal(Deferred value, expected value, optional printer, test ID)
+	fun run_suite()
+
+So any test case added with assert_test or assert_equal is automatically stored in the test_suite which is then run by run_suite
+
 ================================================
 
 Dependencies

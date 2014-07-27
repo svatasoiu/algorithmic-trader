@@ -40,6 +40,13 @@ let _ =
 		"Equal Analyzer 2 stocks"
 		~printer:portfolio_to_string;;
 
+let _ =
+	assert_equal 
+		(Scraper.BasicScraper.get_data ["Open";"PreviousClose";"ChangeinPercent"] ["GOOG";"MSFT"] >>| E.analyze)
+		[("GOOG",0.4);("MSFT",0.5)]
+		"Equal Analyzer 2 stocks fail"
+		~printer:portfolio_to_string;;
+
 run_suite ();;
 
 let () = Core.Std.never_returns (Scheduler.go ())

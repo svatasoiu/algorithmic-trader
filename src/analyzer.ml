@@ -15,6 +15,7 @@ module type ANALYZER =
 	functor (Scr : Scraper.SCRAPER) ->
 		sig
 			type data = Scr.data
+			type hist_data = Scr.hist_data
 			val analyze : data -> portfolio
 		end;;
 
@@ -22,6 +23,7 @@ module EmptyAnalyzer : ANALYZER =
 	functor (Scr : Scraper.SCRAPER) ->
 		struct 
 			type data = Scr.data
+			type hist_data = Scr.hist_data
 			let analyze d = []
 		end;;
 
@@ -29,6 +31,7 @@ module EqualAnalyzer : ANALYZER =
 	functor (Scr : Scraper.SCRAPER) ->
 		struct 		
 			type data = Scr.data
+			type hist_data = Scr.hist_data
 
 			let analyze d = 
 				let tickers = Scr.extract_tickers d in
@@ -36,3 +39,14 @@ module EqualAnalyzer : ANALYZER =
 				List.map tickers (fun t -> (t, prop))
 		end;;
 
+module MovingAverageAnalyzer : ANALYZER =
+	functor (Scr : Scraper.SCRAPER) ->
+		struct 		
+			type data = Scr.data
+			type hist_data = Scr.hist_data
+
+			let analyze d = 
+				let tickers = Scr.extract_tickers d in
+				let prop = 1. /. Float.of_int(List.length tickers) in
+				List.map tickers (fun t -> (t, prop))
+		end;;

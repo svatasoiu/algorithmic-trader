@@ -27,8 +27,8 @@ let handle_test_result test_id printer act exp t =
 										 else (incr numFailed; "\027[31m[FAIL]: " ^ 
 														match printer with
 																None -> ""
-															| Some printer -> (printer (get_option !act)) ^ " not comp to " 
-																							^ (printer exp) ^ " (")) 
+															| Some printer -> ("Actual: {" ^ printer (get_option !act)) ^ "}, Expected: {" 
+																							^ (printer exp) ^ "} (")) 
 														^ test_id ^ ")\n")
 	with _ -> (incr numExcept; print_string ("\027[31m[EXCP]: " ^ test_id ^ "\n"))
 
@@ -57,4 +57,4 @@ let run_suite =
 										~init:f	
 										~f:(fun a x -> a >>= fun _ -> x)) 
 			| [] -> return ()) 
-		>>> fun _ -> print_results (); shutdown 0
+		>>> fun _ -> (print_results (); shutdown (if (!numFailed = 0 && !numExcept = 0) then 0 else 1))

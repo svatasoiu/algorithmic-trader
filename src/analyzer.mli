@@ -7,8 +7,10 @@ module type ANALYZER =
 	functor (Scr : Scraper.SCRAPER) ->
 		sig
 		  type data = Scr.data
+			type hist_data = Scr.hist_data
 			val analyze : data -> portfolio
 		end;;
 
 module EmptyAnalyzer : ANALYZER;;
 module EqualAnalyzer : ANALYZER;;
+module MovingAverageAnalyzer : ANALYZER;;

@@ -41,7 +41,9 @@ let assert_test comp act exp ?printer test_id =
 	try add_test_case_to_suite (act 
 														>>| (fun t -> p := Some t; comp t exp)
 														>>| handle_test_result test_id printer p exp)
-	with EmptyRef -> (incr numExcept; print_string ("\027[31m[EXCP]: " ^ test_id ^ "\n"))
+	with _ -> (incr numExcept; print_string ("\027[31m[EXCP]: " ^ test_id ^ "\n"))
+(* need to fix error handling (think try_with) *)
+
 
 (* appends an async test case to test_suite
 	 that checks the equality of res and (f arg) 

@@ -9,6 +9,7 @@ module type ANALYZER =
 		  type data = Scr.data
 			type hist_data = Scr.hist_data
 			val analyze : data -> portfolio
+			val analyze_hist : hist_data -> portfolio
 		end;;
 
 module EmptyAnalyzer : ANALYZER;;

@@ -4,6 +4,7 @@ open TestSuite;;
 
 module A = EmptyAnalyzer(Scraper.BasicScraper)
 module E = EqualAnalyzer(Scraper.BasicScraper)
+module Mov = MovingAverageAnalyzer(Scraper.BasicScraper)
 
 let _ = 
 	assert_equal 
@@ -45,6 +46,13 @@ let _ =
 		(Scraper.BasicScraper.get_data ["Open";"PreviousClose";"ChangeinPercent"] ["GOOG";"MSFT"] >>| E.analyze)
 		[("GOOG",0.4);("MSFT",0.5)]
 		"Equal Analyzer 2 stocks fail"
+		~printer:portfolio_to_string;;
+
+let _ =
+	assert_equal 
+		(Scraper.BasicScraper.get_hist_data ["Open";"Close"] "MSFT" "2009-05-01" "2010-05-10" >>| Mov.analyze_hist)
+		[("MSFT",1.)]
+		"Moving Average fail"
 		~printer:portfolio_to_string;;
 
 run_suite ();;

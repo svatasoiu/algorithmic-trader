@@ -1,16 +1,16 @@
 SCRAPEREXEC=start_scraper
 TESTEXEC=test_analyzer
-INCL=-I src/ -thread -linkpkg -package core,async,uri,yojson,cohttp.async
+INCL=-I src/ -thread -linkpkg -package core,async,uri,yojson,cohttp.async,graphics
 
 default: build
 
-run-scraper:
+run-scraper: build
 	bin/$(SCRAPEREXEC)
 
-hist-scraper:
-	bin/hist_scraper
+hist-scraper: build
+	bin/hist_scraper ${ARGS}
 
-tests:
+tests: build
 	bin/$(TESTEXEC)
 
 build:
@@ -20,9 +20,7 @@ build:
 	mv src/$(TESTEXEC).native bin/$(TESTEXEC)
 	cd src/ && ocamlbuild -use-ocamlfind test_historical_scraper.native
 	mv src/test_historical_scraper.native bin/hist_scraper
-	make clean
 
 clean:
 	rm -rf src/*~ *~
 	rm src/*.cm*	
-	rm -rf _build/

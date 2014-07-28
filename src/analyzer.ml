@@ -1,7 +1,6 @@
 open Core.Std;;
 open Async.Std;;
 
-type circle = { x : int; y : int; radius : int; color : int }
 type position = [`Long | `Stay | `Short]
 type portfolio = (string * float) list
 
@@ -89,9 +88,9 @@ module MovingAverageAnalyzer : ANALYZER =
 					~f:(fun a (c, p) ->
 						(incr ind; 
 						match c with 
-							1 -> { x= !ind; y= p; radius= 5; color= Graphics.green}::a
+							1 -> (!ind, p, 5, Graphics.green)::a
 						| 0 -> a
-						| -1 -> { x= !ind; y= p; radius= 5; color= Graphics.red}::a))
+						| -1 -> (!ind, p, 5, Graphics.red)::a))
 
 			(* (field, val) list list -> val list where field=field*)
 			let extract_field_from_data d field = 
@@ -109,14 +108,15 @@ module MovingAverageAnalyzer : ANALYZER =
 				let buy_sell = (List.hd_exn long_short)::(compress long_short) in
 
 				let _ = (try_with (fun () -> 
-					Graphics.open_graph ""; 
-					Graphics.resize_window 800 500;
-					Plotter.graph_stock closes;
-					Plotter.graph_stock ~offset:period ~color:Graphics.red (List.rev mov_avg);
+					let g = new Plotter.plotter in
+					(g#set_scale closes;
+					g#graph_stock closes;
+					g#graph_stock ~offset:period ~color:Graphics.red (List.rev mov_avg);
+					g#draw_circles (get_points buy_sell (List.rev mov_avg) period);
 					Graphics.wait_next_event [Graphics.Button_up];
-					return (Graphics.close_graph ())) >>> function 
+					return (Graphics.close_graph ()))) >>> function 
 																				 Ok ()   -> ()
-   																		 | Error _ -> print_string "failure") in
+   																		 | Error s -> print_string (Exn.to_string s)) in
 
 				(Scraper.print_vals 
 					buy_sell (fun _ i -> 

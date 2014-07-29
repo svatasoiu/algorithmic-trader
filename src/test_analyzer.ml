@@ -1,3 +1,4 @@
+open Core.Std;;
 open Async.Std;;
 open Analyzer;;
 open TestSuite;;
@@ -48,12 +49,6 @@ let _ =
 		"Equal Analyzer 2 stocks fail"
 		~printer:portfolio_to_string;;
 
-let _ =
-	assert_equal 
-		(Scraper.BasicScraper.get_hist_data ["Open";"Close"] "MSFT" "2009-05-01" "2010-05-10" >>| Mov.analyze_hist)
-		[("MSFT",1.)]
-		"Moving Average fail"
-		~printer:portfolio_to_string;;
 
 run_suite ();;
 

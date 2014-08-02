@@ -55,7 +55,9 @@ class plotter =
 						(Graphics.set_color c; Graphics.fill_circle (self#to_x_pixel 0 x) (self#to_y_pixel y) r; 
 						let (cx,cy) = Graphics.current_point () in 
 						if (text) 
-						then (Graphics.moveto (self#to_x_pixel (-10) x) ((self#to_y_pixel y) + 20); Graphics.draw_string (Float.to_string y); Graphics.moveto cx cy)))
+						then (Graphics.moveto (self#to_x_pixel (-20) x) ((self#to_y_pixel y) + 10); 
+									Graphics.draw_string (Float.to_string y); 
+									Graphics.moveto cx cy)))
   end ;;
 
 

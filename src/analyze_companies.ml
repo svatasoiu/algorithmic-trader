@@ -10,7 +10,7 @@ let print_res year comp p inv =
 let analyze_company comp start_date end_date =
 		Scraper.BasicScraper.get_hist_data ["Adj_Close"] comp start_date end_date 
 		>>| Mov.create_buy_sell_stream
-		>>| (fun (closes,_,act) -> ((eval_strategy closes act), List.hd_exn closes))
+		>>| (fun (_,closes,_,act) -> ((eval_strategy closes act), List.hd_exn closes))
 		>>> fun (profit,c) -> (print_res (1995) comp profit c);;
 
 analyze_company "AAPL" "2000-02-02" "2011-07-11";;

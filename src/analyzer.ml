@@ -79,7 +79,7 @@ module type ANALYZER =
 
 			val analyze : data -> portfolio
 			val analyze_hist : hist_data -> portfolio
-			val create_buy_sell_stream : hist_data -> (float list * float list * action list)
+			val create_buy_sell_stream : hist_data -> (float list * float list * float list * action list)
 		end;;
 
 module EmptyAnalyzer : ANALYZER =  
@@ -144,11 +144,12 @@ module MovingAverageAnalyzer : ANALYZER =
 				let l = Scr.hist_data_to_list d in
 				let closes = List.map (extract_field_from_data l "Adj_Close") Float.of_string in
 				let mov_avg = moving_average closes period in
-				let long_short = List.map2_exn (List.slice closes (period - 1) (List.length closes)) mov_avg ~f:mov_avg_comp in
-				(closes, mov_avg, (pos_to_act (List.hd_exn long_short))::(compress long_short))
+				let shifted_closes = (List.slice closes (period - 1) (List.length closes)) in
+				let long_short = List.map2_exn shifted_closes mov_avg ~f:mov_avg_comp in
+				(closes, shifted_closes, mov_avg, (pos_to_act (List.hd_exn long_short))::(compress long_short))
 
 			let analyze_hist d = 
-				let (closes, mov_avg, buy_sell) = create_buy_sell_stream d in
+				let (closes, shifted_closes, mov_avg, buy_sell) = create_buy_sell_stream d in
 
 				let _ = (try_with (fun () -> 
 					let g = new Plotter.plotter in
@@ -156,13 +157,13 @@ module MovingAverageAnalyzer : ANALYZER =
 					g#set_scale closes;
 					g#graph_stock closes;
 					g#graph_stock ~offset:(period - 1) ~color:Graphics.red mov_avg;
-					g#draw_circles ~text:true (get_points buy_sell mov_avg (period - 2));
+					g#draw_circles ~text:true (get_points buy_sell shifted_closes (period - 2));
 					Graphics.wait_next_event [Graphics.Button_up];
 					return (Graphics.close_graph ()))) >>> function 
 																				 Ok ()   -> ()
    																		 | Error _ -> print_string "Done") in
 
-				let profit = eval_strategy closes buy_sell in
+				let profit = eval_strategy shifted_closes buy_sell in
 				let _ = print_string ("RESULT: $" ^ (Float.to_string profit) ^ "\n") in
 				List.map closes (fun t -> (Float.to_string t, 1.))
 		end;;

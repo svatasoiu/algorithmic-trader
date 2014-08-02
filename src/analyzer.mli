@@ -14,7 +14,7 @@ module type ANALYZER =
 			type hist_data = Scr.hist_data
 			val analyze : data -> portfolio
 			val analyze_hist : hist_data -> portfolio
-			val create_buy_sell_stream : hist_data -> (float list * float list * action list)
+			val create_buy_sell_stream : hist_data -> (float list * float list * float list * action list)
 		end;;
 
 module EmptyAnalyzer : ANALYZER;;

@@ -7,7 +7,7 @@ let gd =
 	fun _ -> Scraper.BasicScraper.get_data fields ["GOOG";"MSFT";"STT";"BAC"]
 				>>| Scraper.BasicScraper.print_data;;
 
-Scraper.print_vals ("Ticker"::fields) (fun _ field -> print_string ((Scraper.shorten field 7) ^ "\t|\t"));;
+Scraper.print_vals ("Ticker"::fields) (fun field -> print_string ((Scraper.shorten field 7) ^ "\t|\t"));;
 
 print_string "\n";;
 

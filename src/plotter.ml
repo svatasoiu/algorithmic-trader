@@ -48,11 +48,14 @@ class plotter =
 				done;
 				Graphics.moveto a b
 
-		  method draw_circles circles =
+		  method draw_circles ?text:(text=false) circles =
 				List.iter 
 					circles 
 					(fun (x,y,r,c) -> 
-						(Graphics.set_color c; Graphics.fill_circle (self#to_x_pixel 0 x) (self#to_y_pixel y) r))
+						(Graphics.set_color c; Graphics.fill_circle (self#to_x_pixel 0 x) (self#to_y_pixel y) r; 
+						let (cx,cy) = Graphics.current_point () in 
+						if (text) 
+						then (Graphics.moveto (self#to_x_pixel (-10) x) ((self#to_y_pixel y) + 20); Graphics.draw_string (Float.to_string y); Graphics.moveto cx cy)))
   end ;;
 
 

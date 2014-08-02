@@ -21,13 +21,6 @@ let _ =
 		"Empty Analyzer 2"
 		~printer:portfolio_to_string;;
 
-let _ = 
-	assert_equal 
-		(Scraper.BasicScraper.get_data ["Open";"PreviousClose";"ChangeinPercent"] ["GOOG"] >>| A.analyze)
-		(add_to_portfolio empty_portfolio "A" 0.5)
-		"Empty Analyzer fail"
-		~printer:portfolio_to_string;;
-
 let _ =
 	assert_equal 
 		(Scraper.BasicScraper.get_data ["Open";"PreviousClose";"ChangeinPercent"] ["GOOG"] >>| E.analyze)
@@ -44,11 +37,9 @@ let _ =
 
 let _ =
 	assert_equal 
-		(Scraper.BasicScraper.get_data ["Open";"PreviousClose";"ChangeinPercent"] ["GOOG";"MSFT"] >>| E.analyze)
+		(Scraper.BasicScraper.get_hist_data ["Adj_Close"] "AAPL" "2000-02-02" "2011-07-11" >>| Mov.analyze_hist)
 		[("GOOG",0.4);("MSFT",0.5)]
-		"Equal Analyzer 2 stocks fail"
-		~printer:portfolio_to_string;;
-
+		"Moving average Analyzer fail";;
 
 run_suite ();;
 

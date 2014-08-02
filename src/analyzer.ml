@@ -7,7 +7,7 @@ type action 	= [`Buy | `None | `Sell]
 type portfolio = (string * float) list
 
 let period = 200;;
-let debug = false;;
+let debug = true;;
 
 let portfolio_to_string p = 
 	List.fold 
@@ -142,7 +142,7 @@ module MovingAverageAnalyzer : ANALYZER =
 
 			let create_buy_sell_stream d = 
 				let l = Scr.hist_data_to_list d in
-				let closes = List.map (extract_field_from_data l "Close") Float.of_string in
+				let closes = List.map (extract_field_from_data l "Adj_Close") Float.of_string in
 				let mov_avg = moving_average closes period in
 				let long_short = List.map2_exn (List.slice closes (period - 1) (List.length closes)) mov_avg ~f:mov_avg_comp in
 				(closes, mov_avg, (pos_to_act (List.hd_exn long_short))::(compress long_short))
@@ -152,10 +152,11 @@ module MovingAverageAnalyzer : ANALYZER =
 
 				let _ = (try_with (fun () -> 
 					let g = new Plotter.plotter in
-					(g#set_scale closes;
+					(Graphics.open_graph ""; Graphics.resize_window 800 500;
+					g#set_scale closes;
 					g#graph_stock closes;
 					g#graph_stock ~offset:(period - 1) ~color:Graphics.red mov_avg;
-					g#draw_circles (get_points buy_sell mov_avg (period - 2));
+					g#draw_circles ~text:true (get_points buy_sell mov_avg (period - 2));
 					Graphics.wait_next_event [Graphics.Button_up];
 					return (Graphics.close_graph ()))) >>> function 
 																				 Ok ()   -> ()

@@ -4,24 +4,18 @@ open Analyzer;;
 
 module Mov = MovingAverageAnalyzer(Scraper.BasicScraper)
 
-let create_date_range i = 
-	((Int.to_string i) ^ "-01-01",
-	(Int.to_string i) ^ "-12-31");;
-
 let print_res year comp p inv =
 	print_string ((Int.to_string year) ^ "["^comp^"]: $" ^ (Float.to_string p) ^ " on " ^ (Float.to_string inv) ^ " @ " ^ (Printf.sprintf "%.2f" (100. *. p /. inv)) ^ "% return\n")
 
-let analyze_company comp start range =
-	for i = 0 to range do
-		(let (s,e) = create_date_range (start + i) in
-		(Scraper.BasicScraper.get_hist_data ["Close"] comp s e) 
+let analyze_company comp start_date end_date =
+		Scraper.BasicScraper.get_hist_data ["Adj_Close"] comp start_date end_date 
 		>>| Mov.create_buy_sell_stream
 		>>| (fun (closes,_,act) -> ((eval_strategy closes act), List.hd_exn closes))
-		>>> fun (profit,c) -> (print_res (start+i) comp profit c))
-	done;;
+		>>> fun (profit,c) -> (print_res (1995) comp profit c);;
 
-analyze_company "YHOO" 1997 16;;
-analyze_company "MSFT" 1987 26;;
-analyze_company "CMG" 2007 6;;
+analyze_company "AAPL" "2000-02-02" "2011-07-11";;
+analyze_company "MSFT" "2000-02-02" "2011-07-11";;
+analyze_company "C" "2000-02-02" "2011-07-11";;
+analyze_company "YHOO" "2000-02-02" "2011-07-11";;
 
 let () = Core.Std.never_returns (Scheduler.go ())

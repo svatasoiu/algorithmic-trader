@@ -2,7 +2,16 @@ open Core.Std;;
 open Async.Std;;
 
 let shorten s n = String.sub s 0 (min n (String.length s))
-let print_vals vals f = List.fold vals ~init:() ~f:f
+let print_vals vals f = List.iter vals ~f:f
+
+let date_range_to_annual_periods start_date end_date =
+	let rec aux s e acc =
+		if (Date.diff e s) > 400 
+		then let prev = Date.add_months e (-12)
+				 in aux s prev ((Date.add_days prev 1, e)::acc)
+		else (s, e)::acc
+	in let ranges = aux (Date.of_string start_date) (Date.of_string end_date) []
+	in List.map ranges (fun (s, e) -> (Date.to_string s, Date.to_string e))
 
 module type SCRAPER =
 	sig
@@ -83,29 +92,39 @@ module BasicScraper : SCRAPER =
 			List.zip tickers (get_fields_from_json (Yojson.Basic.from_string (String.concat strings)) fields)
 
 		let get_hist_data fields ticker start_date end_date =
-			let uri = create_hist_uri ("Date"::fields) [ticker] start_date end_date in
-			Cohttp_async.Client.get uri
+			let ranges = date_range_to_annual_periods start_date end_date in
+		  let uris = List.map ranges (fun (s,e) -> create_hist_uri ("Date"::fields) [ticker] s e) in
+			Deferred.all (List.map 
+				uris 
+				(fun uri -> 
+					Cohttp_async.Client.get uri
+					>>= fun (_, body) -> 
+					Pipe.to_list (Cohttp_async.Body.to_pipe body)
+					>>| fun strings -> get_hist_fields_from_json (Yojson.Basic.from_string (String.concat strings)) fields))
+			>>| fun l -> (ticker, List.concat (List.rev l)) 
+
+		(*let get_hist_data fields ticker start_date end_date =
+			Cohttp_async.Client.get (create_hist_uri ("Date"::fields) [ticker] start_date end_date)
 			>>= fun (_, body) -> 
 			Pipe.to_list (Cohttp_async.Body.to_pipe body)
 			>>| fun strings -> 
-			(ticker, get_hist_fields_from_json (Yojson.Basic.from_string (String.concat strings)) fields)
+			(ticker, get_hist_fields_from_json (Yojson.Basic.from_string (String.concat strings)) fields)*)
 
-		let hist_data_to_list (ticker, l) = List.rev (List.map l (fun (_,t) -> t))
+		let hist_data_to_list (_, l) = List.rev (List.map l (fun (_,t) -> t))
 
 		let print_data = 
 			function None -> printf "Nothing reported!"
 						 | Some l -> 
-								 print_vals l (fun _ (ticker, vals) -> 
+								 print_vals l (fun (ticker, vals) -> 
 																	print_string ticker;
-																	print_vals vals (fun _ (_, v) -> 
-																								print_string ("\t|\t" ^ (shorten v 7))); 
+																	print_vals vals (fun (_, v) -> print_string ("\t|\t" ^ (shorten v 7))); 
 																	print_string "\n")
 		
 		let print_hist_data (ticker, l) = 
 			(print_string ticker;
-			print_vals l (fun _ (date, d) -> 
+			print_vals l (fun (date, d) -> 
 				print_string ("\t\t|\t" ^ (shorten date 10));
-				print_vals d (fun _ (_, v) -> 
+				print_vals d (fun (_, v) -> 
 					print_string ("\t|\t" ^ (shorten v 7))); 
 				print_string "\n"))
 	end;;

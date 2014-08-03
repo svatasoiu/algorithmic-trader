@@ -103,13 +103,6 @@ module BasicScraper : SCRAPER =
 					>>| fun strings -> get_hist_fields_from_json (Yojson.Basic.from_string (String.concat strings)) fields))
 			>>| fun l -> (ticker, List.concat (List.rev l)) 
 
-		(*let get_hist_data fields ticker start_date end_date =
-			Cohttp_async.Client.get (create_hist_uri ("Date"::fields) [ticker] start_date end_date)
-			>>= fun (_, body) -> 
-			Pipe.to_list (Cohttp_async.Body.to_pipe body)
-			>>| fun strings -> 
-			(ticker, get_hist_fields_from_json (Yojson.Basic.from_string (String.concat strings)) fields)*)
-
 		let hist_data_to_list (_, l) = List.rev (List.map l (fun (_,t) -> t))
 
 		let print_data = 

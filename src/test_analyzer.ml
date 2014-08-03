@@ -37,7 +37,7 @@ let _ =
 
 let _ =
 	assert_equal 
-		(Scraper.BasicScraper.get_hist_data ["Adj_Close"] "AAPL" "2000-02-02" "2011-07-11" >>| Mov.analyze_hist)
+		(Scraper.BasicScraper.get_hist_data ["Adj_Close"] "MSFT" "2000-02-02" "2012-07-01" >>| Mov.analyze_hist)
 		[("GOOG",0.4);("MSFT",0.5)]
 		"Moving average Analyzer fail";;
 

@@ -7,7 +7,7 @@ type action 	= [`Buy | `None | `Sell]
 type portfolio = (string * float) list
 
 let period = 200;;
-let debug = true;;
+let debug = false;;
 
 let portfolio_to_string p = 
 	List.fold 
@@ -35,24 +35,28 @@ let get_last_action l =
 		| [] -> last
 	in aux `None l
 
-let eval_strategy closes strategy =
+let eval_strategy ?conservative:(cons=false) closes strategy =
+	let stocks_owned = ref 0 in
 	let rec aux cs strat acc =
 		match (cs, strat) with 
 		|	(c::c', p::s) -> 
 				aux c' s (match p with
-										`Buy -> (if debug then (print_string ("Bought $" ^ (Float.to_string c) ^ "\n")); acc -. c)
+										`Buy -> (if debug then (print_string ("Bought @ $" ^ (Float.to_string c)^ "\n")); 
+														 if cons 
+														 then (incr stocks_owned; acc -. c) 
+														 else (stocks_owned := !stocks_owned + 2; acc -. (2.*.c)))
 									| `None -> acc
-									| `Sell -> (if debug then (print_string ("Sold $" ^ (Float.to_string c) ^ "\n")); acc +. c))
+									| `Sell -> (if debug then (print_string ("Sold @ $" ^ (Float.to_string c) ^ "\n")); 
+															if cons 
+															then (decr stocks_owned; acc +. c) 
+															else (stocks_owned := !stocks_owned - 2; acc +. (2.*.c))))
 		|	(_, _) -> acc
-	in let res = aux closes strategy 0.
-	in match (List.hd_exn strategy, get_last_action strategy) with
-		 | (`Buy, `Buy) -> res +. (List.last_exn closes) 
-		 | (`Sell, `Sell) -> res -. (List.last_exn closes)
-		 | _ -> res (* shouldn't happen *)
-(*
-let eval_s closes strategy =
-	let first = List.hd_exn strategy in
-	match *)
+	in let res = match (closes,strategy) with 
+							 | (c::c', `Buy::s) -> (incr stocks_owned; aux c' s (-.c))
+							 | (c::c', `Sell::s) -> (decr stocks_owned; aux c' s c)
+							 | (c::c', `None::s) -> aux c' s 0.
+							 | (_,_) -> 0.
+	in res +. ((Float.of_int !stocks_owned) *. (List.last_exn closes))
 
 let empty_portfolio = []
 let add_to_portfolio p s f = (s, f)::p

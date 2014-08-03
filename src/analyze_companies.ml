@@ -13,9 +13,7 @@ let analyze_company comp start_date end_date =
 		>>| (fun (_,closes,_,act) -> ((eval_strategy closes act), List.hd_exn closes))
 		>>> fun (profit,c) -> (print_res (1995) comp profit c);;
 
-analyze_company "AAPL" "2000-02-02" "2011-07-11";;
-analyze_company "MSFT" "2000-02-02" "2011-07-11";;
-analyze_company "C" "2000-02-02" "2011-07-11";;
-analyze_company "YHOO" "2000-02-02" "2011-07-11";;
+let tickers = ["X";"FDX";"VZ";"SPLS";"T";"PEP";"KO";"AAPL";"MSFT";"C";"YHOO";"DJIA"]
+let _ = List.iter tickers (fun t -> analyze_company t "2013-01-01" "2014-07-01")
 
 let () = Core.Std.never_returns (Scheduler.go ())
